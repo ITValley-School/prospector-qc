@@ -1,7 +1,7 @@
 import type { ProspectionResumo, ProspectionDetalhe } from '$lib/dtos/prospection';
 import { mockProspections, mockProspectionDetalhe } from '$lib/mocks/prospections';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8002';
+const API_BASE = import.meta.env.VITE_API_URL ?? '';
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
 
 export async function criarProspection(payload: Record<string, any>): Promise<any> {

@@ -1,7 +1,7 @@
 import type { EngineConfig } from '$lib/dtos/engine';
 import { mockEngines } from '$lib/mocks/engines';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8002';
+const API_BASE = import.meta.env.VITE_API_URL ?? '';
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
 
 export async function listarEngines(): Promise<EngineConfig[]> {
