@@ -12,6 +12,7 @@
 	let loading = $state(true);
 	let saving = $state(false);
 	let message = $state('');
+	let pipelineAberto = $state(false);
 
 	let engine_tipo = $state('ai_api');
 	let provider = $state('openai');
@@ -115,6 +116,97 @@
 						<Badge text={eng.ativo ? 'Ativo' : 'Inativo'} variant={eng.ativo ? 'success' : 'default'} />
 					</div>
 				{/each}
+			</div>
+		{/if}
+	</Card>
+
+	<Card>
+		<button
+			class="w-full flex items-center justify-between text-left"
+			onclick={() => pipelineAberto = !pipelineAberto}
+		>
+			<h2 class="text-xl font-semibold text-text-heading">Pipeline de Busca</h2>
+			<span class="text-accent text-2xl transition-transform {pipelineAberto ? 'rotate-180' : ''}"
+				>&#9660;</span
+			>
+		</button>
+
+		{#if pipelineAberto}
+			<div class="mt-6 space-y-4 text-sm">
+				<p class="text-text-muted">
+					Fluxo completo desde o clique em "Prospectar" ate os leads aparecerem na tela e serem salvos no datalake.
+				</p>
+
+				<div class="space-y-3">
+					<!-- Etapa 1 -->
+					<div class="p-4 bg-navy rounded-lg border border-border">
+						<div class="flex items-center gap-3 mb-2">
+							<span class="bg-accent text-navy font-bold rounded-full w-7 h-7 flex items-center justify-center text-xs">1</span>
+							<span class="font-semibold text-text-heading">Validacao</span>
+						</div>
+						<p class="text-text-muted ml-10">Titulo, segmento, engine (claude_code | ai_api), quantidade (1-50). Salva no SQL Server com status "pendente".</p>
+						<code class="text-xs text-accent ml-10">factories/prospection_factory.py → criar_prospection()</code>
+					</div>
+
+					<!-- Etapa 2 -->
+					<div class="p-4 bg-navy rounded-lg border border-border">
+						<div class="flex items-center gap-3 mb-2">
+							<span class="bg-accent text-navy font-bold rounded-full w-7 h-7 flex items-center justify-center text-xs">2</span>
+							<span class="font-semibold text-text-heading">Montagem do Prompt</span>
+						</div>
+						<p class="text-text-muted ml-10">Injeta segmento, localizacao, quantidade e instrucoes customizadas no template de prompt B2B.</p>
+						<code class="text-xs text-accent ml-10">factories/prospection_factory.py → montar_prompt_prospeccao()</code>
+					</div>
+
+					<!-- Etapa 3 -->
+					<div class="p-4 bg-navy rounded-lg border border-border">
+						<div class="flex items-center gap-3 mb-2">
+							<span class="bg-accent text-navy font-bold rounded-full w-7 h-7 flex items-center justify-center text-xs">3</span>
+							<span class="font-semibold text-text-heading">Execucao da Engine</span>
+						</div>
+						<p class="text-text-muted ml-10">
+							<strong>Claude Code CLI:</strong> <code class="bg-dark px-1 rounded">claude -p "prompt" --output-format json</code><br />
+							<strong>AI API:</strong> OpenAI (gpt-4o) | Anthropic (claude-sonnet) | Google (gemini-2.0-flash)
+						</p>
+						<code class="text-xs text-accent ml-10">engines/claude_code_engine.py | engines/ai_api_engine.py</code>
+					</div>
+
+					<!-- Etapa 4 -->
+					<div class="p-4 bg-navy rounded-lg border border-border">
+						<div class="flex items-center gap-3 mb-2">
+							<span class="bg-accent text-navy font-bold rounded-full w-7 h-7 flex items-center justify-center text-xs">4</span>
+							<span class="font-semibold text-text-heading">Parsing do Resultado</span>
+						</div>
+						<p class="text-text-muted ml-10">Remove markdown, encontra JSON array no texto, valida estrutura. Cada item vira um Lead + Contatos.</p>
+						<code class="text-xs text-accent ml-10">factories/lead_factory.py → parsear_resultado_ia()</code>
+					</div>
+
+					<!-- Etapa 5 -->
+					<div class="p-4 bg-navy rounded-lg border border-border">
+						<div class="flex items-center gap-3 mb-2">
+							<span class="bg-accent text-navy font-bold rounded-full w-7 h-7 flex items-center justify-center text-xs">5</span>
+							<span class="font-semibold text-text-heading">Criacao de Leads</span>
+						</div>
+						<p class="text-text-muted ml-10">Para cada item do array: cria Lead no banco (nome, segmento, website, descricao, score) + LeadContacts (nome, cargo, email, telefone, linkedin).</p>
+						<code class="text-xs text-accent ml-10">factories/lead_factory.py → criar_lead_from_dict() + criar_contatos_from_dict()</code>
+					</div>
+
+					<!-- Etapa 6 -->
+					<div class="p-4 bg-navy rounded-lg border border-border">
+						<div class="flex items-center gap-3 mb-2">
+							<span class="bg-accent text-navy font-bold rounded-full w-7 h-7 flex items-center justify-center text-xs">6</span>
+							<span class="font-semibold text-text-heading">Auto-Export Datalake</span>
+						</div>
+						<p class="text-text-muted ml-10">Gera JSON com leads + contatos, faz upload no Azure Blob Storage (saprospectorqc/sistemaprospect). URL salva na prospection.</p>
+						<code class="text-xs text-accent ml-10">services/export_service.py → exportar_leads() | data/connections/blob_storage.py</code>
+					</div>
+				</div>
+
+				<div class="p-4 bg-dark rounded-lg border border-border mt-4">
+					<p class="text-text-muted text-xs">
+						Documentacao completa: <code class="text-accent">.claude/skills/pipelinesearch.md</code>
+					</p>
+				</div>
 			</div>
 		{/if}
 	</Card>
