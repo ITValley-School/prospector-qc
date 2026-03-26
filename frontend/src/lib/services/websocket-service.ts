@@ -1,4 +1,11 @@
-const WS_BASE = import.meta.env.VITE_WS_URL || 'ws://localhost:8002';
+function getWsBase() {
+	if (import.meta.env.VITE_WS_URL) return import.meta.env.VITE_WS_URL;
+	if (typeof window !== 'undefined') {
+		const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+		return `${proto}//${window.location.host}`;
+	}
+	return 'ws://localhost:8002';
+}
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
 
 export class WebSocketService {
@@ -11,7 +18,8 @@ export class WebSocketService {
 			return;
 		}
 
-		this.ws = new WebSocket(`${WS_BASE}/ws/prospection/${prospectionId}`);
+		const wsBase = getWsBase();
+		this.ws = new WebSocket(`${wsBase}/ws/prospection/${prospectionId}`);
 
 		this.ws.onmessage = (event) => {
 			const data = JSON.parse(event.data);

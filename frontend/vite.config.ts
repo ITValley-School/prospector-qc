@@ -7,5 +7,19 @@ export default defineConfig({
 	server: {
 		port: 5175,
 		host: '0.0.0.0',
+		proxy: {
+			'/api': {
+				target: 'http://localhost:8002',
+				changeOrigin: true,
+			},
+			'/ws': {
+				target: 'ws://localhost:8002',
+				ws: true,
+			},
+			'/health': {
+				target: 'http://localhost:8002',
+				changeOrigin: true,
+			},
+		},
 	},
 });
