@@ -4,8 +4,8 @@ test.describe('Prospector QC', () => {
 	test('pagina principal carrega formulario', async ({ page }) => {
 		await page.goto('/');
 		await expect(page.locator('h1')).toHaveText('Nova Prospeccao');
-		await expect(page.locator('input[placeholder*="Titulo"]')).toBeVisible();
-		await expect(page.locator('input[placeholder*="Segmento"]')).toBeVisible();
+		await expect(page.locator('input[placeholder*="Empresas de tecnologia"]')).toBeVisible();
+		await expect(page.locator('input[placeholder*="Tecnologia da Informacao"]')).toBeVisible();
 	});
 
 	test('navbar mostra todas as paginas', async ({ page }) => {
@@ -30,13 +30,17 @@ test.describe('Prospector QC', () => {
 	test('pagina configuracoes carrega', async ({ page }) => {
 		await page.goto('/configuracoes');
 		await expect(page.locator('h1')).toHaveText('Configuracoes');
-		await expect(page.locator('text=Claude Code CLI')).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Claude Code CLI' })).toBeVisible();
 	});
 
 	test('formulario valida campos obrigatorios', async ({ page }) => {
 		await page.goto('/');
-		await page.click('button:has-text("Prospectar")');
-		await expect(page.locator('text=Preencha titulo e segmento')).toBeVisible();
+		await page.waitForLoadState('networkidle');
+		await page.evaluate(() => {
+			const btn = Array.from(document.querySelectorAll('button')).find(b => b.textContent?.includes('Prospectar'));
+			btn?.click();
+		});
+		await expect(page.getByText('Preencha titulo e segmento')).toBeVisible();
 	});
 
 	test('navegacao entre paginas funciona', async ({ page }) => {

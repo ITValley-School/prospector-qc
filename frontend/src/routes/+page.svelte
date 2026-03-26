@@ -27,6 +27,12 @@
 
 	const wsService = new WebSocketService();
 
+	function handleProspeccaoClick(node: HTMLElement) {
+		const handler = () => iniciarProspeccao();
+		node.addEventListener('click', handler);
+		return { destroy() { node.removeEventListener('click', handler); } };
+	}
+
 	async function iniciarProspeccao() {
 		const dto = new ProspectionRequest({
 			titulo, segmento, localizacao, quantidade_leads, prompt_customizado, engine_tipo,
@@ -77,8 +83,8 @@
 	<Card>
 		<div class="space-y-6">
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-				<Input label="Titulo da prospeccao" placeholder="Ex: Empresas de tecnologia em SP" bind:value={titulo} required />
-				<Input label="Segmento" placeholder="Ex: Tecnologia da Informacao" bind:value={segmento} required />
+				<Input label="Titulo da prospeccao" placeholder="Ex: Empresas de tecnologia em SP" bind:value={titulo} />
+				<Input label="Segmento" placeholder="Ex: Tecnologia da Informacao" bind:value={segmento} />
 			</div>
 
 			<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -108,9 +114,19 @@
 			{/if}
 
 			<div class="flex gap-3">
-				<Button variant="primary" size="lg" onclick={iniciarProspeccao} {loading} disabled={loading}>
+				<button
+					use:handleProspeccaoClick
+					class="inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed bg-accent hover:bg-accent-hover text-white shadow-lg shadow-accent/20 px-6 py-3 text-base gap-2.5"
+					disabled={loading}
+				>
+					{#if loading}
+						<svg class="animate-spin h-4 w-4" viewBox="0 0 24 24">
+							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+						</svg>
+					{/if}
 					Prospectar com {engine_tipo === 'claude_code' ? 'Claude Code' : 'IA API'}
-				</Button>
+				</button>
 			</div>
 		</div>
 	</Card>
