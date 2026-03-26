@@ -1,6 +1,6 @@
 import os
 
-from azure.storage.blob import BlobServiceClient
+from azure.storage.blob import BlobServiceClient, ContentSettings
 
 
 def get_blob_client():
@@ -13,7 +13,7 @@ def get_blob_client():
 def upload_blob(filename: str, data: bytes, content_type: str = "application/json") -> str:
     container = get_blob_client()
     blob = container.get_blob_client(filename)
-    blob.upload_blob(data, overwrite=True, content_settings={"content_type": content_type})
+    blob.upload_blob(data, overwrite=True, content_settings=ContentSettings(content_type=content_type))
     return blob.url
 
 

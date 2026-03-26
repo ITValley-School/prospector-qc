@@ -12,7 +12,7 @@ export async function listarEngines(): Promise<EngineConfig[]> {
 }
 
 export async function configurarEngine(payload: Record<string, any>): Promise<any> {
-	if (USE_MOCK) return { ...payload, id: crypto.randomUUID(), ativo: true };
+	if (USE_MOCK) return { ...payload, id: Math.random().toString(36).slice(2) + Date.now().toString(36), ativo: true };
 	const res = await fetch(`${API_BASE}/api/engines`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },

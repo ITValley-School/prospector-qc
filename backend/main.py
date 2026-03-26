@@ -17,6 +17,18 @@ from routers.ws_manager import manager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    from sqlalchemy import text
+    from data.connections.database import engine, Base
+    from models import prospection, lead, lead_contact, enrichment, engine_config, setting  # noqa: F401
+
+    if engine:
+        with engine.connect() as conn:
+            conn.execute(text(
+                "IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'prospector') "
+                "EXEC('CREATE SCHEMA prospector')"
+            ))
+            conn.commit()
+        Base.metadata.create_all(bind=engine)
     yield
 
 

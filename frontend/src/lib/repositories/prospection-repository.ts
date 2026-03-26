@@ -6,7 +6,8 @@ const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
 
 export async function criarProspection(payload: Record<string, any>): Promise<any> {
 	if (USE_MOCK) {
-		return { ...mockProspectionDetalhe, ...payload, id: crypto.randomUUID(), status: 'pendente' };
+		const id = Math.random().toString(36).slice(2) + Date.now().toString(36);
+		return { ...mockProspectionDetalhe, ...payload, id, status: 'pendente' };
 	}
 	const res = await fetch(`${API_BASE}/api/prospections`, {
 		method: 'POST',

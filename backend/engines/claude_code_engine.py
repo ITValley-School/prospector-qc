@@ -1,7 +1,6 @@
-import subprocess
+import os
 import json
 import asyncio
-from typing import AsyncGenerator
 
 
 async def executar_claude_code(prompt: str, on_progress=None) -> str:
@@ -12,10 +11,14 @@ async def executar_claude_code(prompt: str, on_progress=None) -> str:
         "--output-format", "json",
     ]
 
+    env = os.environ.copy()
+    env.pop("CLAUDECODE", None)
+
     process = await asyncio.create_subprocess_exec(
         *cmd,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
+        env=env,
     )
 
     stdout_data = b""

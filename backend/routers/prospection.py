@@ -1,10 +1,13 @@
 import asyncio
+import json
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 
 from data.connections.database import get_db
 from dtos.prospection.criar.request import CriarProspectionRequest
 from services.prospection_service import criar, listar, buscar, atualizar_status, processar_resultado
+from services.export_service import exportar_leads
 from factories.prospection_factory import montar_prompt_prospeccao
 from engines.claude_code_engine import executar_claude_code
 from engines.ai_api_engine import executar_ai_api
@@ -73,6 +76,14 @@ async def _processar_prospection(prospection_id: str, segmento: str,
         await manager.broadcast(prospection_id, {"status": "parseando", "progresso": 80})
 
         total = processar_resultado(db, prospection_id, resultado)
+
+        # Auto-export para Azure Blob (datalake)
+        try:
+            export_result = exportar_leads(db, prospection_id, "json")
+            atualizar_status(db, prospection_id, "concluido",
+                             arquivo_export_url=export_result["url"])
+        except Exception as export_err:
+            print(f"[WARN] Auto-export falhou: {export_err}")
 
         await manager.broadcast(prospection_id, {
             "status": "concluido",
